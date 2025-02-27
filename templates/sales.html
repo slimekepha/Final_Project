@@ -10,7 +10,7 @@
     <title>Document</title>
 
     <style>
-         .navbar {
+        .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -43,92 +43,96 @@
 </head>
 
 <body>
-    <ul class="navbar">
-        <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/">Myduka</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/">Home</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/dashboard">Dashboard</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/products">Products</a>
-        </li>
+    <div class="container">
+        <ul class="navbar">
+            <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/">Myduka</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/">Home</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/dashboard">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/products">Products</a>
+            </li>
 
-        <li class="nav-item">
-            <a class="nav-link" href="/sales">Sales</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/about">About</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/contact-us">Contact us</a>
-        </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/sales">Sales</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/about">About</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/contact-us">Contact us</a>
+            </li>
 
 
-    </ul>
-    <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-        Launch demo modal
-    </button>
+        </ul>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            Add Sales
+        </button>
 
-    <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="/sales" method="POST">
-                        <div class="mb-3">
-                            <label for="exampleInputEmail1" class="form-label">Product Name</label>
-                            <select name="pid" id="pid">
-                                {% for p in products %}
-                                <option value="{{p[0]}}">{{p[1]}}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="exampleInputPassword1" class="form-label">Quantity</label>
-                            <input type="number" class="form-control" id="exampleInputPassword1" name="quantity">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="/sales" method="POST">
+                            <div class="mb-3">
+                                <label for="exampleInputEmail1" class="form-label">Product Name</label>
+                                <select name="pid" id="pid">
+                                    {% for p in products %}
+                                    <option value="{{p[0]}}">{{p[1]}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exampleInputPassword1" class="form-label">Quantity</label>
+                                <input type="number" class="form-control" id="exampleInputPassword1" name="quantity">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    
 
-    <table id="myTable" border="3">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>PID</th>
-                <th>quantity</th>
-                <th>created_at</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for s in sales[0] %}
-            <tr>
-                <td>{{s[0]}}</td>
-                <td>{{s[1]}}</td>
-                <td>{{s[2]}}</td>
-                <td>{{s[3]}}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
-    <script>let table = new DataTable('#myTable');</script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+
+        <table id="myTable" border="3">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>PID</th>
+                    <th>quantity</th>
+                    <th>created_at</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in sales[0] %}
+                <tr>
+                    <td>{{s[0]}}</td>
+                    <td>{{s[1]}}</td>
+                    <td>{{s[2]}}</td>
+                    <td>{{s[3]}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
+        <script>let table = new DataTable('#myTable');</script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"></script>
+
+
+    </div>
 
 </body>
 

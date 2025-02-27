@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request,redirect
+from flask import Flask,render_template,request,redirect,flash
 
 from database import conn,cur
 from datetime import datetime
@@ -56,7 +56,8 @@ def sales():
           cur.execute(query_make_sale)
           conn.commit()
           return redirect('/sales')
-      
+
+
 
 @app.route("/dashboard")
 def dashboard():
@@ -68,7 +69,9 @@ def dashboard():
     for i in salesperproduct:
         x.append(i[0])
         y.append(float(i[1]))
-    # cur.execute()
+    cur.execute("SELECT products.name, sum(sales.quantity*products.selling_price) from sales join products on products.id=sales.pid group by products.name;")
+    profit_result=cur.fetchall()
+    return render_template("dashboard.html", x=x, y=y, profit_result=profit_result)
 
 
 
@@ -82,9 +85,54 @@ def dashboard():
 # if __name__=="__main__":
 #     app.run()
 
+@app.route("/update-product", methods=["POST"])
+def updateproduct():
+    id=request.form["id"]
+    name=request.form["name"]
+    buying_price=float(request.form['buyingPrice'])
+    selling_price=float(request.form["sellingPrice"])
+    stock_quantity=int(request.form["stockQuantity"])
+    query_update="UPDATE products SET name = '{}', buying_price = {}, selling_price = {}, stock_quantity = {} WHERE id = {};".format(name, buying_price, selling_price, stock_quantity, id)
+    cur.execute(query_update)
+    conn.commit()
+    return redirect("/products")
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == "POST":
+        email_address=request.form["emailaddress"]
+        password= request.form["password"]
+
+        query_login= "SELECT id from users where email_address = '{}' and password= '{}'".format(email_address,password)
+        cur.execute(query_login)
+        row=cur.fetchone()
+
+        if row is None:
+            flash("Invalid credentials")
+            return render_template("login.html")
+        else:
+            return redirect("/dashboard.html")
+    else:
+        return render_template("login.html")
+    
+@app.route("/register", methods=["GET","POST"])
+def register():
+    if request.method == "GET":
+        cur.execute("SELECT* FROM users")
+        users=cur.fetchall()
+        return render_template("register.html", users=users)
+    else:
+        username=request.form["username"]
+        email_address=request.form["email"]
+        password=request.form["password"]
+
+        query_insert_user="INSERT INTO users(username,emailaddress,password) values(%s,%s,%s) RETURNING id;"
+        cur.execute(query_insert_user)
+        conn.commit()
+        return redirect('/')
+
+
 
 
 app.run(debug=True)
 
-
-print("hello")

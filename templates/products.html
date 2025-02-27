@@ -37,6 +37,19 @@
             display: flex;
             gap: 15px;
         }
+
+        .navbar img {
+            height: 40px;
+            /* Adjust the size of the logo */
+            margin-left: 15px;
+            /* Space from left */
+        }
+
+        .navbar .logo {
+            float: left;
+            /* Position logo on the left */
+            padding: 5px 10px;
+        }
     </style>
 
 </head>
@@ -44,6 +57,10 @@
 <body>
     <div class="container">
         <ul class="navbar">
+            <a href="/" class="logo">
+                <img src="CITY DATA.png" alt="" >
+
+            </a>
             <li class="nav-item">
                 <a class="nav-link active" aria-current="page" href="/">Myduka</a>
             </li>
@@ -71,7 +88,7 @@
         </ul>
         <!-- Button trigger modal -->
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-            Launch demo modal
+            Add Product
         </button>
 
         <!-- Modal -->
@@ -100,15 +117,19 @@
                             <label for="stockQuantity">Stock Quantity:</label>
                             <input type="number" name="stockQuantity" required><br><br>
 
+                            <button type="submit" class="btn btn-primary">Save changes</button>
+                        </form>
+
 
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save changes</button>
+
                     </div>
                 </div>
             </div>
         </div>
+
 
 
         <table id="myTable" border="3">
@@ -116,10 +137,13 @@
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
-                    <th>buying_price</th>
-                    <th>stock_quantity</th>
-                    <th>selling_price</th>
+                    <th>Buying Price</th>
+                    <th>Stock Quantity</th>
+                    <th>Selling Price</th>
+                    <th>Action</th>
+
                 </tr>
+
             </thead>
             <tbody>
                 {% for p in products %}
@@ -129,6 +153,63 @@
                     <td>{{p[2]}}</td>
                     <td>{{p[3]}}</td>
                     <td>{{p[4]}}</td>
+                    <td>
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#exampleModal{{p[0]}}">
+                            Edit
+                        </button>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="exampleModal{{p[0]}}" tabindex="-1"
+                            aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="exampleModalLabel">Update Products</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form action="/update-product" method="POST">
+
+                                            <input type="hidden" name="id" value="{{p[0]}}">
+
+                                            <label for="name">Product Name:</label>
+                                            <input value="{{p[1]}}" type="text" name="name" required><br><br>
+
+
+                                            <label for="buyingPrice">Buying Price:</label>
+                                            <input value="{{p[2]}}" type="number" name="buyingPrice" step="0.01"
+                                                required><br><br>
+
+
+                                            <label for="sellingPrice">Selling Price:</label>
+                                            <input value="{{p[4]}}" type="number" name="sellingPrice" step="0.01"
+                                                required><br><br>
+
+
+                                            <label for="stockQuantity">Stock Quantity:</label>
+                                            <input value="{{p[3]}}" type="number" name="stockQuantity" required><br><br>
+
+                                            <button type="submit" class="btn btn-primary">Update</button>
+
+                                        </form>
+
+
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Close</button>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </td>
+
                 </tr>
                 {% endfor %}
             </tbody>
