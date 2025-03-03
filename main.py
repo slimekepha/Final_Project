@@ -9,6 +9,9 @@ app=Flask(__name__)
 def home():
     return render_template("index.html")
 
+cur.execute("CREATE TABLE IF NOT EXISTS products(id SERIAL PRIMARY KEY, name VARCHAR(100), buying_price NUMERIC(14,2), stock_quantity INTEGER, selling_price NUMERIC(14,2))")
+cur.execute("CREATE TABLE IF NOT EXISTS sales (id SERIAL PRIMARY KEY, pid INTEGER REFERENCES products(id), quantity INTEGER NOT NULL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);")
+conn.commit()
 
 @app.route("/about")
 def about():
@@ -130,6 +133,8 @@ def register():
         cur.execute(query_insert_user)
         conn.commit()
         return redirect('/')
+
+
 
 
 
