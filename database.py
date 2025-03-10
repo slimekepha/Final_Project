@@ -2,6 +2,6 @@ import psycopg2
 
 
 
-conn=psycopg2.connect(host="134.209.24.19", port="5432" ,user="birirkephas", database="birirkephas", password="12345")
+conn=psycopg2.connect(host="localhost", port="5432" ,user="postgres", database="myduka", password="slimekepha")
 
 cur=conn.cursor()

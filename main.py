@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request,redirect,flash
+from flask import Flask,render_template,request,redirect,flash,session
 
 from database import conn,cur
 from datetime import datetime
@@ -103,20 +103,44 @@ def updateproduct():
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
-        email_address=request.form["emailaddress"]
-        password= request.form["password"]
+        email_address = request.form["emailaddress"]
+        password = request.form["password"]
 
-        query_login= "SELECT id from users where email_address = '{}' and password= '{}'".format(email_address,password)
-        cur.execute(query_login)
-        row=cur.fetchone()
+        # Use parameterized queries to prevent SQL injection
+        query_login = "SELECT id FROM users WHERE email_address = %s AND password = %s"
+        cur.execute(query_login, (email_address, password))
+        row = cur.fetchone()
 
         if row is None:
             flash("Invalid credentials")
             return render_template("login.html")
         else:
-            return redirect("/dashboard.html")
+            session["email"] = email_address
+            print('Log in success')
+            return redirect("/dashboard")  # Change this to redirect to a route, not a file
     else:
         return render_template("login.html")
+
+
+# @app.route("/login", methods=["POST", "GET"])
+# def login():
+#     if request.method == "POST":
+#         email_address=request.form["emailaddress"]
+#         password= request.form["password"]
+
+#         query_login= "SELECT id from users where email_address = '{}' and password= '{}'".format(email_address,password)
+#         cur.execute(query_login)
+#         row=cur.fetchone()
+
+#         if row is None:
+#             flash("Invalid credentials")
+#             return render_template("login.html")
+#         else:
+#             session["email"] = email_address
+#             print('Log in success')
+#             return redirect("dashboard.html")
+#     else:
+#         return render_template("login.html")
     
 @app.route("/register", methods=["GET","POST"])
 def register():
@@ -133,6 +157,24 @@ def register():
         cur.execute(query_insert_user)
         conn.commit()
         return redirect('/')
+    
+
+@app.route("/expenses", methods=["GET", "POST"])
+def expenses():
+    if request.method=="GET":
+        cur.execute("SELECT * FROM PURCHASES ORDER BY purchase_date DESC")
+        expenses=cur.fetchall()
+        return render_template("expenses.html", expenses=expenses)
+    else:
+        expense_category = request.form["expense_category"] 
+        description = request.form["description"]
+        amount = int(request.form["amount"]) 
+
+        query_create_expense="INSERT INTO purchases(expense_category, description, amount, purchase_date)"\
+                        "VALUES('{}','{}',{}, now())".format(expense_category,description,amount)
+        cur.execute(query_create_expense)
+        conn.commit()
+        return redirect("/expenses")
 
 
 
