@@ -1,11 +1,29 @@
-from flask import Flask,render_template,request,redirect,flash,session
+from flask import Flask,render_template,request,redirect,flash,session,url_for
+from functools import wraps
 
 from database import conn,cur
 from datetime import datetime
+from flask_bcrypt import Bcrypt
+
 
 app=Flask(__name__)
 
+app=Flask(__name__)
+bcrypt = Bcrypt(app)
+
+app.secret_key = 'ghhuudkks'
+
+def login_required(f):
+    @wraps(f)
+    def protected():
+        if 'email' not in session:
+            return redirect(url_for("login"))
+        return f()
+    return protected
+
+
 @app.route("/")
+@login_required
 def home():
     return render_template("index.html")
 
@@ -23,6 +41,7 @@ def contact():
     return render_template("contact.html")
 
 @app.route("/products", methods=["GET","POST"])
+@login_required
 def products():
     if request.method == "GET":
         cur.execute("SELECT*FROM products")
@@ -42,6 +61,7 @@ def products():
 
 
 @app.route("/sales", methods=["GET", "POST"])
+@login_required
 def sales():
       if request.method == "GET":
          cur.execute("SELECT * FROM sales")
@@ -63,6 +83,7 @@ def sales():
 
 
 @app.route("/dashboard")
+@login_required
 def dashboard():
     cur.execute("SELECT products.name, sum(sales.quantity*products.selling_price) from sales join products on products.id=sales.pid group by products.name;")
     salesperproduct=cur.fetchall()
@@ -143,6 +164,7 @@ def login():
 #         return render_template("login.html")
     
 @app.route("/register", methods=["GET","POST"])
+@login_required
 def register():
     if request.method == "GET":
         cur.execute("SELECT* FROM users")
@@ -160,6 +182,7 @@ def register():
     
 
 @app.route("/expenses", methods=["GET", "POST"])
+@login_required
 def expenses():
     if request.method=="GET":
         cur.execute("SELECT * FROM PURCHASES ORDER BY purchase_date DESC")
