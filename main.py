@@ -23,7 +23,7 @@ def login_required(f):
 
 
 @app.route("/")
-@login_required
+# @login_required
 def home():
     return render_template("index.html")
 
@@ -41,7 +41,7 @@ def contact():
     return render_template("contact.html")
 
 @app.route("/products", methods=["GET","POST"])
-@login_required
+# @login_required
 def products():
     if request.method == "GET":
         cur.execute("SELECT*FROM products")
@@ -61,7 +61,7 @@ def products():
 
 
 @app.route("/sales", methods=["GET", "POST"])
-@login_required
+# @login_required
 def sales():
       if request.method == "GET":
          cur.execute("SELECT * FROM sales")
@@ -83,7 +83,7 @@ def sales():
 
 
 @app.route("/dashboard")
-@login_required
+# @login_required
 def dashboard():
     cur.execute("SELECT products.name, sum(sales.quantity*products.selling_price) from sales join products on products.id=sales.pid group by products.name;")
     salesperproduct=cur.fetchall()
@@ -128,10 +128,18 @@ def login():
         password = request.form["password"]
 
         # Use parameterized queries to prevent SQL injection
-        query_login = "SELECT id FROM users WHERE email_address = %s AND password = %s"
+        query_login = "SELECT id FROM users WHERE emailaddress = %s AND password = %s"
         cur.execute(query_login, (email_address, password))
         row = cur.fetchone()
+        print(f'{row} is the user')
+        hashed_password_query= "SELECT password FROM users WHERE emailaddress= %s"
+        cur.execute(hashed_password_query, (email_address,))
+        hash_pass=cur.fetchone()[0]
+        print(f'{hash_pass} is the hashed passowrd')
 
+        valid_pass=bcrypt.check_password_hash(hash_pass,password)
+        print(f'{valid_pass} Boolean')
+        
         if row is None:
             flash("Invalid credentials")
             return render_template("login.html")
@@ -164,7 +172,7 @@ def login():
 #         return render_template("login.html")
     
 @app.route("/register", methods=["GET","POST"])
-@login_required
+# @login_required
 def register():
     if request.method == "GET":
         cur.execute("SELECT* FROM users")
@@ -174,15 +182,17 @@ def register():
         username=request.form["username"]
         email_address=request.form["email"]
         password=request.form["password"]
+        hash_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
         query_insert_user="INSERT INTO users(username,emailaddress,password) values(%s,%s,%s) RETURNING id;"
+        print(f'{hash_password} is the hashed password')
         cur.execute(query_insert_user)
         conn.commit()
-        return redirect('/')
+        return redirect('/login')
     
 
 @app.route("/expenses", methods=["GET", "POST"])
-@login_required
+# @login_required
 def expenses():
     if request.method=="GET":
         cur.execute("SELECT * FROM PURCHASES ORDER BY purchase_date DESC")

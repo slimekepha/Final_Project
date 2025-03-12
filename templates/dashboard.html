@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -45,33 +46,17 @@
 
 <body>
 
-    <ul class="navbar">
-        <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="/">Myduka</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/">Home</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/dashboard">Dashboard</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/products">Products</a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link" href="/sales">Sales</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/about">About</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="/contact-us">Contact us</a>
-        </li>
-
-
-    </ul>
-
+    <nav class="navbar">
+        <a class="logo" href="/">Myduka</a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/dashboard">Dashboard</a>
+            <a href="/products">Products</a>
+            <a href="/sales">Sales</a>
+            <a href="/about">About</a>
+            <a href="/contact-us">Contact us</a>
+        </div>
+    </nav>
 
     <div class="container mymodal">
         <div class="row">
@@ -81,32 +66,31 @@
             <div class="col-6">
                 <canvas id="bar-chart-1" width="400" height="225"></canvas>
             </div>
-
         </div>
-
     </div>
 
     <script>
         new Chart(document.getElementById("bar-chart"), {
             type: 'bar',
             data: {
-                labels: {{ x | tojson | safe}}
-            datasets: [
-            {
-                label: "Sales",
-                backgroundColor: ["#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850"],
-                data: {{ y | tojson | safe}}
+                labels: {{ x | tojson | safe }},
+                datasets: [
+                    {
+                        label: "Sales",
+                        backgroundColor: ["#3e95cd", "#8e5ea2", "#3cba9f", "#e8c3b9", "#c45850"],
+                        data: {{ y | tojson | safe }}
                     }
-        ]
+                ]
             },
             options: {
-            legend: { display: false },
-            title: {
-                display: true,
-                text: 'Sales Per Product'
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: 'Sales Per Product'
+                }
             }
-        }
         });
+
         new Chart(document.getElementById("bar-chart-1"), {
             type: 'bar',
             data: {
@@ -137,6 +121,5 @@
         crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
 </body>
-
 
 </html>
