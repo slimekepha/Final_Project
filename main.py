@@ -15,15 +15,17 @@ app.secret_key = 'ghhuudkks'
 
 def login_required(f):
     @wraps(f)
-    def protected():
+    def protected(*args, **kwargs):
         if 'email' not in session:
-            return redirect(url_for("login"))
-        return f()
+            flash('You must first login')
+            next_url=request.url
+            return redirect(url_for("login", next=next_url))
+        return f(*args, **kwargs)
     return protected
 
 
 @app.route("/")
-# @login_required
+@login_required
 def home():
     return render_template("index.html")
 
@@ -35,10 +37,48 @@ conn.commit()
 def about():
     return render_template("about.html")
 
+@app.route("/logout")
+def logout():
+    return render_template("login.html")
+
 
 @app.route("/contact-us")
 def contact():
     return render_template("contact.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    next_url=request.args.get('next')
+    print("-------------hjgggg-------fdxds", next_url)
+    if request.method == "POST":
+        email_address = request.form["emailaddress"]
+        password = request.form["password"]
+
+        cur.execute("SELECT id FROM users WHERE emailaddress='{}'". format(email_address))
+        email_exists=cur.fetchone()
+
+        if email_exists is None:
+           print("----------not print-------")
+           flash('email does not exist, try to register if you dont have an account')
+           return redirect("/login")
+        else:
+            cur.execute("SELECT password FROM users WHERE emailaddress='{}'".format(password))
+            hash_pass=cur.fetchone[0]
+            pass_bool=bcrypt.check_password_hash(hash_pass, password)
+
+            if pass_bool == False:
+                flash("Invalid Credentials")
+                return redirect("/login")
+            else:
+                print("--------sssssdddd----dddd", request.form['next_url'])
+                next_url=request.form["next_url"]
+                session['email']=email_address
+                if next_url == "None":
+                    return redirect("/dashboard")
+                else:
+                    url="/"+next_url.split('/')[-1]
+                    return redirect(url)
+    return render_template("login.html", next_url=next_url)
 
 @app.route("/products", methods=["GET","POST"])
 # @login_required
@@ -121,55 +161,18 @@ def updateproduct():
     conn.commit()
     return redirect("/products")
 
-@app.route("/login", methods=["POST", "GET"])
-def login():
-    if request.method == "POST":
-        email_address = request.form["emailaddress"]
-        password = request.form["password"]
-
-        # Use parameterized queries to prevent SQL injection
-        query_login = "SELECT id FROM users WHERE emailaddress = %s AND password = %s"
-        cur.execute(query_login, (email_address, password))
-        row = cur.fetchone()
-        print(f'{row} is the user')
-        hashed_password_query= "SELECT password FROM users WHERE emailaddress= %s"
-        cur.execute(hashed_password_query, (email_address,))
-        hash_pass=cur.fetchone()[0]
-        print(f'{hash_pass} is the hashed passowrd')
-
-        valid_pass=bcrypt.check_password_hash(hash_pass,password)
-        print(f'{valid_pass} Boolean')
-        
-        if row is None:
-            flash("Invalid credentials")
-            return render_template("login.html")
-        else:
-            session["email"] = email_address
-            print('Log in success')
-            return redirect("/dashboard")  # Change this to redirect to a route, not a file
-    else:
-        return render_template("login.html")
+@app.route("/update-stock", methods=["POST"])
+def updatestock():
+    id=request.form["id"]
+    pid=request.form["pid"]
+    quantity=int(request.form["quantity"])
+    created_at=datetime.now()
+    query_stock_update="UPDATE stock SET quantity = %s, created_at = NOW() WHERE id = %s"
+    cur.execute(query_stock_update, (quantity,created_at, id))
+    conn.commit()
+    return redirect("/stock")
 
 
-# @app.route("/login", methods=["POST", "GET"])
-# def login():
-#     if request.method == "POST":
-#         email_address=request.form["emailaddress"]
-#         password= request.form["password"]
-
-#         query_login= "SELECT id from users where email_address = '{}' and password= '{}'".format(email_address,password)
-#         cur.execute(query_login)
-#         row=cur.fetchone()
-
-#         if row is None:
-#             flash("Invalid credentials")
-#             return render_template("login.html")
-#         else:
-#             session["email"] = email_address
-#             print('Log in success')
-#             return redirect("dashboard.html")
-#     else:
-#         return render_template("login.html")
     
 @app.route("/register", methods=["GET","POST"])
 # @login_required
@@ -209,6 +212,23 @@ def expenses():
         conn.commit()
         return redirect("/expenses")
 
+@app.route("/stock", methods=["GET", "POST"])
+# @login_required
+def stock():
+    if request.method=="GET":
+        cur.execute("SELECT stock.id, products.name, stock.quantity, stock.created_at FROM stock join products on products.id=stock.pid")
+        stock=cur.fetchall()
+        cur.execute("SELECT * FROM products ORDER BY name ASC")
+        products=cur.fetchall()
+        return render_template("stock.html", stock=stock, products=products)
+    else:
+        pid=request.form["pid"]
+        quantity=request.form["quantity"]
+        query_update_stock="INSERT INTO stock(quantity, pid,created_at)"\
+                            "VALUES({},{},now())".format(quantity,pid)
+        cur.execute(query_update_stock)
+        conn.commit()
+        return redirect("/stock")
 
 
 
