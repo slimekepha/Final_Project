@@ -63,7 +63,7 @@ def login():
            return redirect("/login")
         else:
             cur.execute("SELECT password FROM users WHERE emailaddress='{}'".format(password))
-            hash_pass=cur.fetchone[0]
+            hash_pass=cur.fetchone()[0]
             pass_bool=bcrypt.check_password_hash(hash_pass, password)
 
             if pass_bool == False:
@@ -81,7 +81,7 @@ def login():
     return render_template("login.html", next_url=next_url)
 
 @app.route("/products", methods=["GET","POST"])
-# @login_required
+@login_required
 def products():
     if request.method == "GET":
         cur.execute("SELECT*FROM products")
@@ -177,21 +177,58 @@ def updatestock():
 @app.route("/register", methods=["GET","POST"])
 # @login_required
 def register():
-    if request.method == "GET":
-        cur.execute("SELECT* FROM users")
-        users=cur.fetchall()
-        return render_template("register.html", users=users)
-    else:
-        username=request.form["username"]
-        email_address=request.form["email"]
-        password=request.form["password"]
-        hash_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    if request.method =="GET":
+        cur.execute('SELECT*FROM USERS;')
+        allusers=cur.fetchall()
+        return render_template('register.html', allusers=allusers)
 
-        query_insert_user="INSERT INTO users(username,emailaddress,password) values(%s,%s,%s) RETURNING id;"
-        print(f'{hash_password} is the hashed password')
-        cur.execute(query_insert_user)
-        conn.commit()
-        return redirect('/login')
+        
+        
+    else:
+        username=request.form['username']
+        email_address=request.form['email']
+        password=request.form['password']
+
+        query_check_email="SELECT id FROM users WHERE emailaddress='{}'".format(email_address)
+        cur.execute(query_check_email)
+        users=cur.fetchone()
+
+        print(f'{users} is the user')
+
+        if not users is None:
+            flash("Email exists!!")
+            return render_template('register.html')
+        else:
+            password=request.form['password']
+            confirmpassword=request.form['confirmpassword']
+            if confirmpassword != password:
+                flash('Passwords do not match!!')
+                return redirect("/register")
+            else:
+                hashed_pass=bcrypt.generate_password_hash(password).decode('utf-8')
+                query_insert_user="INSERT INTO users(username,emailaddress,password)"\
+                    "values('{}','{}','{}')".format(username,email_address,hashed_pass)
+                
+                cur.execute(query_insert_user)
+                conn.commit()
+                return redirect("/login")
+
+
+    # if request.method == "GET":
+    #     cur.execute("SELECT* FROM users")
+    #     users=cur.fetchall()
+    #     return render_template("register.html", users=users)
+    # else:
+    #     username=request.form["username"]
+    #     email_address=request.form["email"]
+    #     password=request.form["password"]
+    #     hash_password = bcrypt.generate_password_hash(password).decode('utf-8')
+
+    #     query_insert_user="INSERT INTO users(username,emailaddress,password) values(%s,%s,%s) RETURNING id;"
+    #     print(f'{hash_password} is the hashed password')
+    #     cur.execute(query_insert_user)
+    #     conn.commit()
+    #     return redirect('/login')
     
 
 @app.route("/expenses", methods=["GET", "POST"])
